@@ -7,6 +7,7 @@ import tkinter as tk
 from tkinter import filedialog
 import numpy as np
 from PIL import Image
+import math
 
 # Filepath and prefix for the images created. The tiled photos can be deleted later.
 # Having this be a dedicated directory makes file deletion easier. 
@@ -18,15 +19,6 @@ prefix = r'<prefix path>'
 # This should be the filepath and the name with the extension. 
 # Somethinglike: r'C:\Users\Josamycin\KeepableImages\Image.png'
 output = r'<output path>'
-
-image1path = filedialog.askopenfilename()
-
-# Load your image using PIL
-image1 = Image.open(image1path)  # Replace with your actual image path
-
-# Convert the PIL image to a NumPy array
-im_array = np.array(image1)
-im = np.array(image1)
 
 def get_concat_h(im1, im2):
     dst = Image.new('RGB', (im1.width + im2.width, im1.height))
@@ -40,13 +32,27 @@ def get_concat_v(im1, im2):
     dst.paste(im2, (0, im1.height))
     return dst
 
-# Update the values of m and n accordingly. 
-# Works best if m and n are exact divisors of the height and width and n*m < 1000.
-# When m = n, aspect ratio of each tile is the same as the original image. 
-m = 4 # if the resolution heights ends in zero consider changing to 5 or 10
-n = 4 # if the resolution heights ends in zero consider changing to 5 or 10
-M = round(image1.height/m)
-N = round(image1.width/n)
+def crop_image(image,left, top, right, bottom):
+    cropped_image = image.crop((left, top, right, bottom))
+    return cropped_image
+
+image1path = filedialog.askopenfilename()
+
+# Load your image using PIL
+image1 = Image.open(image1path)  # Replace with your actual image path
+
+# Now you can access the shape
+# M, N = 100, 100 
+m = 5
+n = 5
+M = math.floor(image1.height/m)
+N = math.floor(image1.width/n)
+
+image2 = image1.crop((0,0,N*n,M*m))
+
+# Convert the PIL image to a NumPy array
+im_array = np.array(image2)
+im = np.array(image2)
 
 # Set your desired tile dimensions
 # tiles = [im_array[x:x+M, y:y+N] for x in range(0, im_array.shape[0], M) for y in range(0, im_array.shape[1], N)]
